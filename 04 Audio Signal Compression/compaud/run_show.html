@@ -1,0 +1,23 @@
+<div style="width:500px;">
+  <button id="do_run_all" style="display:inline-block">
+    Run application</button>
+  <form action="javascript:code_toggle()" style="display:inline-block">
+    <input type="submit" value="Show/Hide code">
+</div>
+<script>
+  code_show=true; 
+  $("#do_run_all").click(
+      function () {
+          $("#run_all_cells").click();
+      }
+  );
+  function code_toggle() {
+      if (code_show){
+          $('div.input').hide();
+      } else {
+          $('div.input').show();
+      }
+      code_show = !code_show
+  } 
+  $( document ).ready(code_toggle);
+</script>
