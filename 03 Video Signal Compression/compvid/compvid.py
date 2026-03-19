@@ -27,6 +27,10 @@ class CoVidTool():
         self.conf = conf
         self.vid = {}
         self.window = 5
+        self.progress_callback = None
+        self.progress_every = 100
+        self._progress_start_t = None
+        self._progress_last_done = -1
 
     def get_frames(self, vid):
         return int(vid.get(cv.CAP_PROP_FRAME_COUNT))
@@ -220,6 +224,24 @@ class CoVidTool():
         self.axs[2].legend(fontsize=8)
         
     def draw_frame(self, k):
+        done = k + 1
+        if self.progress_callback is not None:
+            should_report = (
+                (done == 1) or
+                (done % self.progress_every == 0) or
+                (done == self.anim_steps)
+            )
+            if should_report and (done != self._progress_last_done):
+                try:
+                    tnow = time.time()
+                    elapsed = None
+                    if self._progress_start_t is not None:
+                        elapsed = tnow - self._progress_start_t
+                    self.progress_callback(done, self.anim_steps, elapsed)
+                    self._progress_last_done = done
+                except Exception:
+                    # Progress reporting should not interrupt rendering.
+                    pass
         if  k < (self.anim_steps-1):
             idata = self.set_data_return_comp(k)
             if idata is not None:
@@ -283,6 +305,8 @@ class CoVidTool():
         N = data.shape[0]
         self.set_animate(N)
         self.anim_steps = N-2
+        self._progress_start_t = time.time()
+        self._progress_last_done = -1
         anim = animation.FuncAnimation(
             self.fig,
             self.draw_frame,
@@ -292,7 +316,12 @@ class CoVidTool():
         )
         #
         # plt.show()
-        return anim.to_html5_video()
+        try:
+            out = anim.to_html5_video()
+        finally:
+            self._progress_start_t = None
+            self._progress_last_done = -1
+        return out
 
 
 

@@ -344,15 +344,31 @@ class CoViGui():
         return comp_top
     
     def set_cr_info(self):
-            if ((self.src_file.value != '') and
-                (self.rec_file.value != '')):
-                probe_src = self.probe_info['source']
-                probe_rec = self.probe_info[self.sel_rec.value]
-                cr_txt = 'Compression ratio: %.2f'%(probe_src['os_fsize']/probe_rec['os_fsize'])
-                crzip_txt = 'Zip compression ratio: %.2f'%(probe_src['os_fsize']/probe_src['zip_fsize'])
-                self.cr_info.value = ' | '.join([cr_txt, crzip_txt])
-            else:
-                self.cr_info.value = ''
+        if ((self.src_file.value != '') and
+            (self.rec_file.value != '')):
+            probe_src = self.probe_info['source']
+            probe_rec = self.probe_info[self.sel_rec.value]
+            cr_txt = 'Compression ratio: %.2f'%(probe_src['os_fsize']/probe_rec['os_fsize'])
+            crzip_txt = 'Zip compression ratio: %.2f'%(probe_src['os_fsize']/probe_src['zip_fsize'])
+            self.cr_info.value = ' | '.join([cr_txt, crzip_txt])
+        else:
+            self.cr_info.value = ''
+
+    def set_anim_progress(self, done, total, elapsed):
+        if total <= 0:
+            return
+        pct = 100.0 * (done / total)
+        if (elapsed is None) or (elapsed <= 0):
+            self.mpl_win.value = (
+                'Creating animation... %d/%d (%.1f%%)' % (done, total, pct)
+            )
+            return
+        fps = done / elapsed
+        eta = (total - done) / fps if fps > 0 else 0
+        self.mpl_win.value = (
+            'Creating animation... %d/%d (%.1f%%), ETA ~%.1fs'
+            % (done, total, pct, eta)
+        )
 
     def drive_comparer(self):
         self.rec_file.value = ''
@@ -455,6 +471,7 @@ class CoViGui():
     def animate_plot(self):
         self.vid_comp.conf['source'] = self.src_file.value
         self.vid_comp.conf['recons'] = self.rec_file.value
+        self.vid_comp.progress_callback = self.set_anim_progress
         self.vid_comp.load_vids()
         g_success, geom_s, geom_r = self.vid_comp.check_geometry()
         if g_success:
@@ -496,4 +513,3 @@ class CoViGui():
 
 def run_gui():
     return CoViGui().run()
-
