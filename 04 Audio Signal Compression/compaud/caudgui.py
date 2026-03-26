@@ -42,7 +42,7 @@ class CAudGui():
     def setup_workspace(self):
         if os.path.isdir(self.audio_path):
             shutil.rmtree(self.audio_path)
-            os.mkdir(self.audio_path)
+        os.mkdir(self.audio_path)
         
     def add_path(self, fname):
         return os.path.join(self.audio_path, fname)
@@ -135,7 +135,8 @@ class CAudGui():
             
     def drive_probe_source(self):
         c = self.components['probe_source']
-        c_trs = self.components['transcode']        
+        c_trs = self.components['transcode']
+        c_cmp = self.components['compare']
         def handle_upl_chg(change):
             if len(change.new) > 0:
                 if len(change.old) > 0:
@@ -162,9 +163,15 @@ class CAudGui():
             c['info2'].value = ''
             if self.check_file(c_trs['f_name'].value):
                 self.rm_file(c_trs['f_name'].value)
+            c_trs['f_name'].value = ''
             c_trs['info1'].value = ''
             c_trs['info2'].value = ''
             c_trs['dl_lnk'].value = ''
+            c_cmp['f_name'].value = ''
+            c_cmp['info1'].value = ''
+            c_cmp['info2'].value = ''
+            c_cmp['info_cr'].value = ''
+            self.clear_output_mpl()
         c['bn_rm'].on_click(on_bn_rm_ckd)
 
 
