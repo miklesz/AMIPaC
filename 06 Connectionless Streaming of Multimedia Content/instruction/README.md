@@ -1,6 +1,6 @@
 # Connectionless Streaming of Multimedia Content
 
-Andrzej M. and Mikolaj L.
+Andrzej Matiolanski, Mikolaj Leszczuk
 
 ## Introduction
 
