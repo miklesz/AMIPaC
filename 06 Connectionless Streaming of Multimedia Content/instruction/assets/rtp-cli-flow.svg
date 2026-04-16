@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="320" viewBox="0 0 1080 320">
+  <style>
+    .bg { fill: #eef6f2; }
+    .box { fill: #ffffff; stroke: #274c43; stroke-width: 3; rx: 18; ry: 18; }
+    .title { font: 700 22px Arial, sans-serif; fill: #274c43; }
+    .text { font: 16px Arial, sans-serif; fill: #274c43; }
+    .label { font: 700 18px Arial, sans-serif; fill: #d17a22; }
+    .arrow { stroke: #d17a22; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#d17a22"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1080" height="320"/>
+  <rect class="box" x="40" y="90" width="290" height="170"/>
+  <rect class="box" x="395" y="90" width="290" height="170"/>
+  <rect class="box" x="750" y="90" width="290" height="170"/>
+  <rect class="box" x="395" y="28" width="290" height="46"/>
+  <text class="title" x="130" y="128">Sender</text>
+  <text class="text" x="76" y="162">ffmpeg -re ...</text>
+  <text class="text" x="76" y="188">-an -c:v copy</text>
+  <text class="text" x="62" y="214">-f rtp -sdp_file /tmp/amipac-06.sdp</text>
+  <text class="title" x="497" y="128">RTP</text>
+  <text class="text" x="440" y="162">rtp://RECEIVER_IP:5004</text>
+  <text class="text" x="434" y="188">Timing + payload metadata</text>
+  <text class="title" x="842" y="128">Receiver</text>
+  <text class="text" x="789" y="162">vlc --play-and-exit</text>
+  <text class="text" x="814" y="188">/tmp/amipac-06.sdp</text>
+  <text class="label" x="474" y="58">SDP side file</text>
+  <path class="arrow" d="M330 165 C360 165, 365 165, 395 165"/>
+  <path class="arrow" d="M685 165 C715 165, 720 165, 750 165"/>
+</svg>

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="280" viewBox="0 0 1080 280">
+  <style>
+    .bg { fill: #f7f3e8; }
+    .box { fill: #fffdf8; stroke: #2f4858; stroke-width: 3; rx: 18; ry: 18; }
+    .title { font: 700 22px Arial, sans-serif; fill: #2f4858; }
+    .text { font: 15px Arial, sans-serif; fill: #2f4858; }
+    .label { font: 700 18px Arial, sans-serif; fill: #bc4b51; }
+    .arrow { stroke: #bc4b51; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#bc4b51"/>
+    </marker>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1080" height="280"/>
+  <rect class="box" x="40" y="60" width="290" height="160"/>
+  <rect class="box" x="395" y="60" width="290" height="160"/>
+  <rect class="box" x="750" y="60" width="290" height="160"/>
+  <text class="title" x="122" y="98">Source File</text>
+  <text class="text" x="76" y="130">media/</text>
+  <text class="text" x="58" y="150">BigBuckBunny_320x180.mp4</text>
+  <text class="text" x="83" y="176">ffmpeg -re ...</text>
+  <text class="text" x="72" y="198">-c copy -f mpegts</text>
+  <text class="title" x="471" y="98">UDP Network</text>
+  <text class="text" x="440" y="134">udp://RECEIVER_IP:1234</text>
+  <text class="text" x="456" y="164">No delivery guarantee</text>
+  <text class="title" x="841" y="98">Receiver</text>
+  <text class="text" x="790" y="134">vlc --play-and-exit</text>
+  <text class="text" x="820" y="164">udp://@:1234</text>
+  <text class="text" x="794" y="188">Visible player window</text>
+  <path class="arrow" d="M330 140 C360 140, 365 140, 395 140"/>
+  <path class="arrow" d="M685 140 C715 140, 720 140, 750 140"/>
+  <text class="label" x="475" y="38">CLI only</text>
+</svg>
