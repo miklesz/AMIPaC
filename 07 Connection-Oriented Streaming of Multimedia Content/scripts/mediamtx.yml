@@ -1,0 +1,13 @@
+# MediaMTX config for exercise 07 (RTSP/TCP path)
+# Allows publishing and reading stream path: /live
+
+logLevel: warn
+
+rtsp: yes
+rtspAddress: :8554
+rtspTransports: [tcp, udp]
+
+paths:
+  live:
+    source: publisher
+
