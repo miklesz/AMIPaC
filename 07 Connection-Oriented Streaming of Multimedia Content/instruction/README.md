@@ -43,6 +43,10 @@ Typical installation commands:
 sudo apt update
 sudo apt install ffmpeg vlc
 
+# Ubuntu (MediaMTX)
+# download release binary from:
+# https://github.com/bluenviron/mediamtx/releases
+
 # macOS with Homebrew
 brew install ffmpeg
 brew install --cask vlc
@@ -87,9 +91,9 @@ Helper scripts:
 Additional VLC views used in this exercise:
 
 <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:flex-start;">
-  <img src="assets/image3.png" alt="VLC network stream dialog" width="46%">
-  <img src="assets/image4.png" alt="VLC streaming wizard" width="34%">
-  <img src="assets/image5.png" alt="VLC URL example" width="46%">
+  <img src="assets/image3.png" alt="VLC network stream dialog">
+  <img src="assets/image4.png" alt="VLC streaming wizard">
+  <img src="assets/image5.png" alt="VLC URL example">
 </div>
 
 
@@ -220,5 +224,6 @@ If a report is required, include:
 2. FFmpeg Protocols, <https://ffmpeg.org/ffmpeg-protocols.html>
 3. VLC User Documentation, <https://docs.videolan.me/vlc-user/>
 4. RFC 2326: Real Time Streaming Protocol (RTSP), <https://www.rfc-editor.org/rfc/rfc2326>
-5. RFC 2616 (historic) / HTTP core RFC set, <https://httpwg.org/specs/>
+5. HTTP Semantics (RFC 9110), HTTP Caching (RFC 9111), HTTP/1.1 (RFC 9112), <https://httpwg.org/specs/>
+6. RFC 2616 (historic, obsoleted), <https://www.rfc-editor.org/rfc/rfc2616>
 
