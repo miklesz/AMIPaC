@@ -1,10 +1,36 @@
-import os, shutil, time, pathlib
+import os, time, pathlib
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython.display import HTML, Audio
 import ipywidgets as wg
 import librosa
 from .compaud import probe_info, transcode, faudio_to_np, CompAudio
+
+
+def _upload_items(value):
+    """Return FileUpload entries for both ipywidgets 7 and 8."""
+    if not value:
+        return []
+    if isinstance(value, dict):
+        out = []
+        for name, item in value.items():
+            item = dict(item)
+            item.setdefault('name', name)
+            out.append(item)
+        return out
+    return [dict(item) for item in value]
+
+
+def _upload_name(item):
+    return item.get('name') or item.get('metadata', {}).get('name')
+
+
+def _upload_content(item):
+    content = item['content']
+    if isinstance(content, memoryview):
+        return content.tobytes()
+    return content
+
 
 def run_show():
     path_h = pathlib.Path(__file__).parent
@@ -40,9 +66,7 @@ class CAudGui():
                      'external':None}
         
     def setup_workspace(self):
-        if os.path.isdir(self.audio_path):
-            shutil.rmtree(self.audio_path)
-        os.mkdir(self.audio_path)
+        os.makedirs(self.audio_path, exist_ok=True)
         
     def add_path(self, fname):
         return os.path.join(self.audio_path, fname)
@@ -138,11 +162,15 @@ class CAudGui():
         c_trs = self.components['transcode']
         c_cmp = self.components['compare']
         def handle_upl_chg(change):
-            if len(change.new) > 0:
-                if len(change.old) > 0:
-                    self.rm_file(change.old[0]['name'])
-                c['f_name'].value = change.new[0]['name']
-                self.write_file(c['f_name'].value, change.new[0]['content'])
+            new_files = _upload_items(change.new)
+            old_files = _upload_items(change.old)
+            if len(new_files) > 0:
+                if len(old_files) > 0:
+                    old_name = _upload_name(old_files[0])
+                    if old_name and self.check_file(old_name):
+                        self.rm_file(old_name)
+                c['f_name'].value = _upload_name(new_files[0])
+                self.write_file(c['f_name'].value, _upload_content(new_files[0]))
                 (la, lb) = self.info_file(c['f_name'].value, 'source')
                 c['info1'].value = la
                 c['info2'].value = lb
@@ -359,11 +387,15 @@ class CAudGui():
         c_trs = self.components['transcode']
         c = self.components['compare']
         def handle_upl_chg(change):
-            if len(change.new) > 0:
-                if len(change.old) > 0:
-                    self.rm_file(change.old[0]['name'])
-                c['f_name'].value = change.new[0]['name']
-                self.write_file(c['f_name'].value, change.new[0]['content'])
+            new_files = _upload_items(change.new)
+            old_files = _upload_items(change.old)
+            if len(new_files) > 0:
+                if len(old_files) > 0:
+                    old_name = _upload_name(old_files[0])
+                    if old_name and self.check_file(old_name):
+                        self.rm_file(old_name)
+                c['f_name'].value = _upload_name(new_files[0])
+                self.write_file(c['f_name'].value, _upload_content(new_files[0]))
                 c['sel_rec'].value = 'local'
                 (la, lb) = self.info_file(c['f_name'].value, 'external')
                 c['info1'].value = la
@@ -380,10 +412,11 @@ class CAudGui():
                 c['info1'].layout.visibility = 'hidden'
                 c['info2'].layout.visibility = 'hidden'
                 self.clear_output_mpl()
-                
+
             elif change.new == 'external':
-                if len(c['bn_upl'].value) > 0:
-                    c['f_name'].value = c['bn_upl'].value[0]['name']
+                files = _upload_items(c['bn_upl'].value)
+                if len(files) > 0:
+                    c['f_name'].value = _upload_name(files[0])
                     c['info1'].layout.visibility = 'visible'
                     c['info2'].layout.visibility = 'visible'
                     self.clear_output_mpl()

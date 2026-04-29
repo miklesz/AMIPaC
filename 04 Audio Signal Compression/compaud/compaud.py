@@ -40,21 +40,27 @@ def _probe(fname):
 
 def _get_info(probe):
     pf = probe['format']
+    streams = [s for s in probe['streams'] if s.get('codec_type') == 'audio']
+    if not streams:
+        raise ValueError('No audio stream found in the selected file.')
+    s = streams[0]
     info = {}
-    info['format'] = (pf['format_name'], pf['format_long_name'])
-    info['duration'] = float(pf['duration'])
+    info['format'] = (pf.get('format_name', 'unknown'),
+                      pf.get('format_long_name', 'unknown'))
+    duration = s.get('duration', pf.get('duration', 0))
+    info['duration'] = float(duration)
     # bit rate get
-    info['fsize'] = float(pf['size'])/1024
-    info['bit_rate_file'] = float(pf['bit_rate'])
+    info['fsize'] = float(pf.get('size', 0))/1024
+    info['bit_rate_file'] = float(pf.get('bit_rate') or 0)
     # file bit rate print(8*float(pf['size'])/info['duration']) [bit/sec]
-    s = probe['streams'][0]
-    if s['codec_type'] == 'audio':
-        info['sample_format'] = s['sample_fmt']
-        info['codec'] = (s['codec_name'], s['codec_long_name'])
-        info['channels'] = s['channels']
-        info['duration'] = float(s['duration'])
-        info['sample_rate'] = int(s['sample_rate'])
-        info['bit_rate_stream'] = float(s['bit_rate'])
+    if info['bit_rate_file'] == 0 and info['duration'] > 0 and info['fsize'] > 0:
+        info['bit_rate_file'] = 8 * (info['fsize'] * 1024) / info['duration']
+    info['sample_format'] = s.get('sample_fmt', 'unknown')
+    info['codec'] = (s.get('codec_name', 'unknown'),
+                     s.get('codec_long_name', 'unknown'))
+    info['channels'] = int(s.get('channels', 1))
+    info['sample_rate'] = int(s.get('sample_rate', 0))
+    info['bit_rate_stream'] = float(s.get('bit_rate') or info['bit_rate_file'])
     return info
 
 def probe_info(fname):
@@ -124,20 +130,31 @@ class CompAudio():
         self.rec['info'] = info_recons
         sample_format = 'f32le'
         dtype = self.sample_format[sample_format]
-        n_channels = info_source['channels']
+        src_channels = info_source['channels']
+        rec_channels = info_recons['channels']
         
-        self.src['data'] = faudio_to_np(fsource, sample_format, dtype, n_channels)
-        self.rec['data'] = faudio_to_np(frecons, sample_format, dtype, n_channels)
+        self.src['data'] = faudio_to_np(fsource, sample_format, dtype, src_channels)
+        self.rec['data'] = faudio_to_np(frecons, sample_format, dtype, rec_channels)
+
+    def channel_count(self):
+        return min(self.src['data'].shape[1], self.rec['data'].shape[1])
+
+    def channel_label(self, k):
+        return ['Left channel', 'Right channel'][k] if k < 2 else 'Channel %d' % (k + 1)
+
+    def channel_color(self, k):
+        return ['blue', 'red', 'green', 'purple'][k % 4]
 
 
     def set_ae_mae(self):
         s = self.src['data']
         r = self.rec['data']
         N = min(s.shape[0],r.shape[0])
-        data_shape = list(s.shape)
+        C = self.channel_count()
+        data_shape = [N, C]
         data_shape[0] = N
         sae = np.zeros(data_shape, dtype=float)
-        ae = np.abs(s[:N,:] -r[:N,:])
+        ae = np.abs(s[:N, :C] - r[:N, :C])
         
         sae[0,:] = ae[0,:]
         for k in range(1,N):        
@@ -145,7 +162,7 @@ class CompAudio():
         #for k in range(N):        
         #    sae[k,:] = sae[k,:]/(k+1)
         #mae = sae
-        mae = sae/np.array([range(1,N+1),range(1,N+1)]).T
+        mae = sae/np.arange(1, N+1)[:, None]
         self.comp_data = {}
         self.comp_data['mae'] = mae 
         self.comp_data['ae'] = ae
@@ -161,11 +178,15 @@ class CompAudio():
 
     def display_wave(self, data, ax, channel='left'):
         sr = self.src['info']['sample_rate']
-        labeltxt = 'Left channel'
-        color ='blue'
-        if channel != 'left':
-            labeltxt = 'Right channel'
-            color = 'red'
+        if isinstance(channel, int):
+            labeltxt = self.channel_label(channel)
+            color = self.channel_color(channel)
+        else:
+            labeltxt = 'Left channel'
+            color ='blue'
+            if channel != 'left':
+                labeltxt = 'Right channel'
+                color = 'red'
         librosa.display.waveshow(
             data,
             sr=sr,
@@ -191,13 +212,13 @@ class CompAudio():
         fig, axs = plt.subplots(nrows=2, ncols=1, figsize=(8,4), dpi=100)
 
 
-        self.display_wave(self.src['data'][:,0], ax=axs[0], channel='left')
-        self.display_wave(self.src['data'][:,1], ax=axs[0], channel='right')        
+        for k in range(self.src['data'].shape[1]):
+            self.display_wave(self.src['data'][:, k], ax=axs[0], channel=k)
         self.set_ax_conf(axs[0],title='Source')
         axs[0].label_outer()
 
-        self.display_wave(self.rec['data'][:,0], ax=axs[1], channel='left')
-        self.display_wave(self.rec['data'][:,1], ax=axs[1], channel='right')
+        for k in range(self.rec['data'].shape[1]):
+            self.display_wave(self.rec['data'][:, k], ax=axs[1], channel=k)
         self.set_ax_conf(axs[1],title='Reconstructed')
         
     
@@ -209,75 +230,68 @@ class CompAudio():
         sr = self.src['info']['sample_rate']
         #fig, axs = plt.subplots(nrows=4, ncols=1, figsize=(8,6), dpi=100,
         #                        num="Spectrogram (STFT)")
-        fig, axs = plt.subplots(nrows=4, ncols=1, figsize=(8,6), dpi=100)
+        rows = self.src['data'].shape[1] + self.rec['data'].shape[1]
+        fig, axs = plt.subplots(nrows=rows, ncols=1, figsize=(8, max(4, rows * 1.5)), dpi=100)
+        axs = np.atleast_1d(axs)
          
         fig.subplots_adjust(hspace=0.35)
-        D = librosa.stft(self.src['data'][:,0])
-        S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)        
-        im0 = librosa.display.specshow(S_db, x_axis='time', y_axis='log', ax=axs[0], sr=sr)
-        self.set_ax_spec(axs[0],title='Source, Left Channel, STFT (log scale)')
-        axs[0].label_outer()
+        images = []
+        row = 0
+        for k in range(self.src['data'].shape[1]):
+            D = librosa.stft(self.src['data'][:, k])
+            S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+            images.append(librosa.display.specshow(S_db, x_axis='time', y_axis='log', ax=axs[row], sr=sr))
+            self.set_ax_spec(axs[row], title='Source, %s, STFT (log scale)' % self.channel_label(k))
+            axs[row].label_outer()
+            row += 1
 
-        D = librosa.stft(self.src['data'][:,1])
-        S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-        im1 = librosa.display.specshow(S_db, x_axis='time', y_axis='log', ax=axs[1], sr=sr)
-        self.set_ax_spec(axs[1],title='Source, Right Channel, STFT (log scale)')
-        axs[1].label_outer()
-        
-        D = librosa.stft(self.rec['data'][:,0])
-        S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-        im2 = librosa.display.specshow(S_db, x_axis='time', y_axis='log', ax=axs[2], sr=sr)
-        self.set_ax_spec(axs[2], title='Reconstructed, Left Channel, STFT (log scale)')
-        axs[2].label_outer()
-        
-        D = librosa.stft(self.rec['data'][:,1])
-        S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-        im3 = librosa.display.specshow(S_db, x_axis='time', y_axis='log', ax=axs[3], sr=sr)
-        self.set_ax_spec(axs[3], title='Reconstructed, Right Channel, STFT (log scale)')
+        for k in range(self.rec['data'].shape[1]):
+            D = librosa.stft(self.rec['data'][:, k])
+            S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+            images.append(librosa.display.specshow(S_db, x_axis='time', y_axis='log', ax=axs[row], sr=sr))
+            self.set_ax_spec(axs[row], title='Reconstructed, %s, STFT (log scale)' % self.channel_label(k))
+            if row < rows - 1:
+                axs[row].label_outer()
+            row += 1
 
         
-        cbar = fig.colorbar(im0, ax=[axs[0],axs[1], axs[2], axs[3]], format="%+2.f dB")
+        cbar = fig.colorbar(images[0], ax=list(axs), format="%+2.f dB")
         cbar.ax.tick_params(labelsize=8)
 
-        axs[3].set_xlabel('Time (s)')
+        axs[-1].set_xlabel('Time (s)')
 
     def plot_spec_mel(self):
         sr = self.src['info']['sample_rate']
-        fig, axs = plt.subplots(nrows=4, ncols=1, figsize=(8,6), dpi=100)
+        rows = self.src['data'].shape[1] + self.rec['data'].shape[1]
+        fig, axs = plt.subplots(nrows=rows, ncols=1, figsize=(8, max(4, rows * 1.5)), dpi=100)
+        axs = np.atleast_1d(axs)
         #fig, axs = plt.subplots(nrows=4, ncols=1, figsize=(8,6), dpi=100,
         #                        num="Spectrogram (MEL)")
         fig.subplots_adjust(hspace=0.35)
         
-        D = librosa.feature.melspectrogram(y=self.src['data'][:,0], sr=sr)
-        M_db = librosa.power_to_db(np.abs(D), ref=np.max)
-        im0 = librosa.display.specshow(M_db, x_axis='time', y_axis='mel', ax=axs[0], sr=sr)
-        self.set_ax_spec(axs[0], title='Source, Left Channel, Mel spectrogram')
-        axs[0].label_outer()
+        images = []
+        row = 0
+        for k in range(self.src['data'].shape[1]):
+            D = librosa.feature.melspectrogram(y=self.src['data'][:, k], sr=sr)
+            M_db = librosa.power_to_db(np.abs(D), ref=np.max)
+            images.append(librosa.display.specshow(M_db, x_axis='time', y_axis='mel', ax=axs[row], sr=sr))
+            self.set_ax_spec(axs[row], title='Source, %s, Mel spectrogram' % self.channel_label(k))
+            axs[row].label_outer()
+            row += 1
 
-
-        D = librosa.feature.melspectrogram(y=self.src['data'][:,1], sr=sr)
-        M_db = librosa.power_to_db(np.abs(D), ref=np.max)
-        im1 = librosa.display.specshow(M_db, x_axis='time', y_axis='mel', ax=axs[1], sr=sr)
-        self.set_ax_spec(axs[1],title='Source, Right Channel, Mel spectrogram')
-        axs[1].label_outer()
-
-
-        D = librosa.feature.melspectrogram(y=self.rec['data'][:,0], sr=sr)
-        M_db = librosa.power_to_db(np.abs(D), ref=np.max)
-        im2 = librosa.display.specshow(M_db, x_axis='time', y_axis='mel', ax=axs[2], sr=sr)
-        self.set_ax_spec(axs[2],title='Reconstructed, Left Channel, Mel spectrogram')
-        axs[2].label_outer()
+        for k in range(self.rec['data'].shape[1]):
+            D = librosa.feature.melspectrogram(y=self.rec['data'][:, k], sr=sr)
+            M_db = librosa.power_to_db(np.abs(D), ref=np.max)
+            images.append(librosa.display.specshow(M_db, x_axis='time', y_axis='mel', ax=axs[row], sr=sr))
+            self.set_ax_spec(axs[row], title='Reconstructed, %s, Mel spectrogram' % self.channel_label(k))
+            if row < rows - 1:
+                axs[row].label_outer()
+            row += 1
         
-
-        D = librosa.feature.melspectrogram(y=self.rec['data'][:,1], sr=sr)
-        M_db = librosa.power_to_db(np.abs(D), ref=np.max)
-        im3 = librosa.display.specshow(M_db, x_axis='time', y_axis='mel', ax=axs[3], sr=sr)
-        self.set_ax_spec(axs[3], title='Reconstructed, Right Channel, Mel spectrogram')    
-        
-        cbar = fig.colorbar(im0, ax=[axs[0],axs[1], axs[2], axs[3]], format="%+2.f dB")
+        cbar = fig.colorbar(images[0], ax=list(axs), format="%+2.f dB")
         cbar.ax.tick_params(labelsize=8)
 
-        axs[3].set_xlabel('Time (s)')
+        axs[-1].set_xlabel('Time (s)')
 
 
     def plot_ae_mae(self):
@@ -294,11 +308,9 @@ class CompAudio():
         ptick = {'axis':'y','style':'sci','scilimits':(0,0),'useMathText':True}
         tick_fontsize = 7
         pbase = {'alpha':0.5}
-        pleft = {'color':'blue', 'label':'Left channel'}
-        pright= {'color':'red', 'label':'Right channel'}
-        
-        axs[0].plot(t, ae[:,0], **pbase, **pleft)
-        axs[0].plot(t, ae[:,1], **pbase, **pright)
+        for k in range(ae.shape[1]):
+            pch = {'color': self.channel_color(k), 'label': self.channel_label(k)}
+            axs[0].plot(t, ae[:, k], **pbase, **pch)
         self.set_ax_conf(axs[0],title='AE')
                 
         axs[0].ticklabel_format(**ptick)
@@ -308,8 +320,9 @@ class CompAudio():
         axs[0].label_outer()
 
         pmae = {'ls':'--', 'lw':2}
-        axs[1].plot(t, mae[:,0], **pmae, **pleft, **pbase)
-        axs[1].plot(t, mae[:,1], **pmae, **pright, **pbase)
+        for k in range(mae.shape[1]):
+            pch = {'color': self.channel_color(k), 'label': self.channel_label(k)}
+            axs[1].plot(t, mae[:, k], **pmae, **pbase, **pch)
 
         self.set_ax_conf(axs[1],title='MAE')
         axs[1].ticklabel_format(**ptick)
@@ -327,26 +340,23 @@ class CompAudio():
         
         s0 = np.abs(scipy.fftpack.fft(self.src['data'][:,0]))
         f0 = np.linspace(0,sr, len(s0))
-        s1 = np.abs(scipy.fftpack.fft(self.src['data'][:,1]))
-        f1 = np.linspace(0,sr, len(s1))
         xmax = min(f0.max(), 5_000)
         
         axs[0].set_xlim((0,xmax))
         pbase = {'alpha':0.5}
-        pleft = {'color':'blue', 'label':'Left channel'}
-        pright = {'color':'red', 'label':'Right channel'} 
-        axs[0].plot(f0,s0, **pbase, **pleft)
-        axs[0].plot(f1,s1, **pbase, **pright)
+        for k in range(self.src['data'].shape[1]):
+            sk = np.abs(scipy.fftpack.fft(self.src['data'][:, k]))
+            fk = np.linspace(0, sr, len(sk))
+            pch = {'color': self.channel_color(k), 'label': self.channel_label(k)}
+            axs[0].plot(fk, sk, **pbase, **pch)
         self.set_ax_conf(axs[0],title='Source, FFT')
         axs[0].label_outer()
         
-        s0 = np.abs(scipy.fftpack.fft(self.rec['data'][:,0]))
-        f0 = np.linspace(0,sr, len(s0))
-        s1 = np.abs(scipy.fftpack.fft(self.rec['data'][:,1]))
-        
-        f1 = np.linspace(0,sr, len(s1))
-        axs[1].plot(f0,s0, **pbase, **pleft)
-        axs[1].plot(f1,s1, **pbase, **pright)        
+        for k in range(self.rec['data'].shape[1]):
+            sk = np.abs(scipy.fftpack.fft(self.rec['data'][:, k]))
+            fk = np.linspace(0, sr, len(sk))
+            pch = {'color': self.channel_color(k), 'label': self.channel_label(k)}
+            axs[1].plot(fk, sk, **pbase, **pch)
         self.set_ax_conf(axs[1], title='Reconstructed, FFT')
         axs[1].set_xlim((0,xmax))
         axs[1].set_xlabel('Frequency (Hz)')
