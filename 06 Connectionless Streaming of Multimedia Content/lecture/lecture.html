@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connectionless Streaming of Multimedia Content</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #fff;
+    }
+    .remark-slide-content {
+      font-size: 24px;
+      line-height: 1.25;
+      color: #1e1e1e;
+      padding: 1.1em 1.4em 1.1em 1.4em;
+    }
+    .remark-slide-content h1 { font-size: 2em; }
+    .remark-slide-content h2 { font-size: 1.35em; }
+    .remark-slide-content h3 { font-size: 1.05em; }
+    .remark-slide-content img {
+      max-width: 100%;
+      height: auto;
+    }
+    .small {
+      font-size: 0.72em;
+      color: #666;
+    }
+    .remark-slide-content.intro-video-slide {
+      padding-top: 0.15em;
+      padding-bottom: 0.12em;
+      padding-left: 0.35em;
+      padding-right: 0.35em;
+    }
+    .intro-video-frame {
+      width: 100%;
+      margin-top: 0.1em;
+    }
+    .intro-video-frame video {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      max-height: calc(100vh - 2.5em);
+      object-fit: contain;
+      border-radius: 10px;
+      border: 1px solid #ccd5df;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+<textarea id="source">
+
+# Connectionless Streaming of Multimedia Content
+
+<div style="font-size:1.05em; color:#808080;">Mikolaj Leszczuk</div>
+<div style="font-size:1.05em;"><span style="color:#00A200;">Akademia Gorniczo-Hutnicza</span> <span style="color:#808080;">im. Stanislawa Staszica w Krakowie</span></div>
+<div style="font-size:1.05em; color:#808080;">AGH University of Science and Technology</div>
+
+---
+
+## Introduction: What Is Media Streaming in Practice?
+
+> Multimedia that is constantly received by and presented to an end-user while being delivered by a provider.
+
+- Providing **multimedia information** to the user, usually on request.
+- **Transmission of compressed multimedia data** over the **Internet**.
+
+---
+
+class: center, middle, intro-video-slide
+
+<div class="intro-video-frame">
+  <video
+    id="intro-video"
+    src="media/SARACEN Tutorial 1 - Streaming technologies.v2.avi [ef0dDyFL8D4].mp4"
+    playsinline
+    loop
+    controls
+    preload="metadata">
+  </video>
+</div>
+
+---
+
+## Two Types of Access to Streaming Media
+
+### Live (Broadcasting)
+- Video **captured** on the **server**.
+- All users watch the same current video.
+- Example: **live** concert streaming.
+
+### On Request (On Demand)
+- Video **stored** on the **server**.
+- Each user chooses a video to watch.
+- Example: **VOD** movie streaming.
+
+---
+
+## Serving: Live Broadcasting and On-Demand
+
+![](media/slide05-image9.png)
+
+---
+
+## What Do We Actually Expect from "Video Service"?
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.72em; line-height:1.1; margin-top:8px;">
+  <div style="border:1px solid #d5dde6; border-radius:10px; padding:10px; background:#f8fafc;">
+    <div style="font-weight:700; margin-bottom:4px;">What happens when you click?</div>
+    <ul style="margin:0 0 0 0.9em;"><li>Download</li><li>Playback</li></ul>
+  </div>
+  <div style="border:1px solid #d5dde6; border-radius:10px; padding:10px; background:#f8fafc;">
+    <div style="font-weight:700; margin-bottom:4px;">How advanced control?</div>
+    <ul style="margin:0 0 0 0.9em;"><li>Only <span style="display:inline-block; padding:1px 7px; border:1px solid #7e8fa3; border-radius:999px; background:#eef3f8; font-weight:700;">Play</span></li><li>Full controls: <span style="display:inline-block; padding:1px 7px; border:1px solid #7e8fa3; border-radius:999px; background:#eef3f8; font-weight:700;">Play</span> <span style="display:inline-block; padding:1px 7px; border:1px solid #7e8fa3; border-radius:999px; background:#eef3f8; font-weight:700;">Pause</span> <span style="display:inline-block; padding:1px 7px; border:1px solid #7e8fa3; border-radius:999px; background:#eef3f8; font-weight:700;">Stop</span> <span style="display:inline-block; padding:1px 7px; border:1px solid #7e8fa3; border-radius:999px; background:#eef3f8; font-weight:700;">Rewind</span> <span style="display:inline-block; padding:1px 7px; border:1px solid #7e8fa3; border-radius:999px; background:#eef3f8; font-weight:700;">Fast forward</span></li></ul>
+  </div>
+  <div style="border:1px solid #d5dde6; border-radius:10px; padding:10px; background:#f8fafc;">
+    <div style="font-weight:700; margin-bottom:4px;">If we have excess bandwidth?</div>
+    <ul style="margin:0 0 0 0.9em;"><li>Download in advance</li><li>Reallocation of resources to other users</li></ul>
+  </div>
+  <div style="border:1px solid #d5dde6; border-radius:10px; padding:10px; background:#f8fafc;">
+    <div style="font-weight:700; margin-bottom:4px;">If the network will not handle this?</div>
+    <ul style="margin:0 0 0 0.9em;"><li>Wait until buffered</li><li>Accept breaks in transmission</li></ul>
+  </div>
+</div>
+
+---
+
+## Communication?
+
+<div style="display:flex; gap:20px; justify-content:center; align-items:stretch; margin-top:18px; font-size:0.92em;">
+  <div style="flex:1; border:2px solid #6b7a8f; border-radius:16px; padding:18px; background:#f7f9fc;">
+    <div style="font-weight:700; font-size:1.15em; text-align:center; margin-bottom:12px; color:#1e1e1e;">Connectionless</div>
+    <ul style="margin:0 0 0 1.1em; line-height:1.35;">
+      <li><span style="color:#00693c; font-weight:700;">Less overhead</span></li>
+      <li><span style="color:#00693c; font-weight:700;">Precise control of resources</span></li>
+      <li><span style="color:#a71930; font-weight:700;">Dedicated server</span></li>
+      <li><span style="color:#a71930; font-weight:700;">Limited network support</span></li>
+    </ul>
+  </div>
+  <div style="flex:1; border:2px solid #6b7a8f; border-radius:16px; padding:18px; background:#f7f9fc;">
+    <div style="font-weight:700; font-size:1.15em; text-align:center; margin-bottom:12px; color:#1e1e1e;">Connection-Oriented</div>
+    <ul style="margin:0 0 0 1.1em; line-height:1.35;">
+      <li><span style="color:#a71930; font-weight:700;">More overhead</span></li>
+      <li><span style="color:#a71930; font-weight:700;">Rough control of resources</span></li>
+      <li><span style="color:#00693c; font-weight:700;">HTTP server</span></li>
+      <li><span style="color:#00693c; font-weight:700;">Global network support</span></li>
+    </ul>
+  </div>
+</div>
+
+---
+
+## Introducing Real-Time Transport Protocol (RTP)
+
+- Transport layer **protocol** for real-time streaming media.
+- Not a standalone protocol.
+- Requiring another transport protocol to combine with:
+  - Theoretically: any transport protocol
+  - Practically: used only with **User Datagram Protocol (UDP)**
+- Inheriting **UDP** features, including support for both **Unicast** and **Multicast** transmissions.
+- **UDP+RTP** is a good multimedia transport protocol.
+- **RTP** header located between **UDP** header and **UDP** payload, but not another network layer.
+
+---
+
+## RTP and Quality of Service (QoS)
+
+- No guarantee for **QoS** in **RTP**.
+- QoS guarantees through cooperation with other protocols, such as:
+  - **Real-Time Streaming Protocol (RTSP)**
+  - **Session Initiation Protocol (SIP)**
+  - **H.323**
+  - **Resource Reservation Protocol (RSVP)**
+- Their task is to establish a connection before data can be transmitted using RTP.
+
+---
+
+## RTP Limited "Real-Time"
+
+- <span style="color:#A71930; font-weight:700;">Does not</span> reserve resources
+- <span style="color:#A71930; font-weight:700;">Does not</span> guarantee QoS for real-time services, including:
+  - Packet delivery (at all)
+  - Scheduled packet delivery (even if lower layers do guarantee it)
+  - Ordered packet delivery
+- <span style="color:#00693C; font-weight:700;">But extends UDP</span> with information on:
+  - Type of transmitted data
+  - Timestamp
+  - Serial number (of packet)
+
+---
+
+## RTP Sequential Number
+
+- Sending packet order <span style="color:#00693C; font-weight:700;">possible</span> to reconstruct at receiver.
+- <span style="color:#00693C; font-weight:700;">Possible</span> to correctly localize packet in stream, for example without decompressing video frames.
+
+---
+
+## Applications of RTP
+
+- Multipoint audio/video-conferencing (primary application)
+- **Voice over IP (VoIP)**
+- **Video on Demand (VoD)**
+- Other applications of audio/video
+- Distributed simulations
+- Games
+- Monitoring
+- Other applications having access to real-time data
+
+---
+
+## RTP Control Protocol (RTCP)
+
+- Not to be confused with <span style="color:#FF0000; font-weight:700;">Real Time Streaming Protocol (RTSP)</span>.
+- <span style="color:#00B0F0; font-weight:700;">RTP</span> transport controlled by <span style="color:#FF0000; font-weight:700;">RTCP</span>.
+- Main additional functionality by <span style="color:#FF0000; font-weight:700;">RTCP</span>: QoS monitoring for volumes of data transports.
+- <span style="color:#00B0F0; font-weight:700;">RTP</span> and <span style="color:#FF0000; font-weight:700;">RTCP</span> working simultaneously.
+
+![](media/slide13-image10.png)
+
+---
+
+## Real Time Streaming Protocol (RTSP)
+
+- Application layer **protocol** to control **streaming media server**.
+- "Network remote control" for **multimedia servers** and more.
+- Negotiating:
+  - Communication (**Unicast**, **Multicast** ...)
+  - Transport protocols (**UDP**, **RTP**, **HTTP** ...)
+  - Codecs...
+- Syntax similar to **HTTP**, but supports states.
+
+<div style="text-align:center; margin-top: 8px;">
+  <img src="media/slide14-image11.jpeg" alt="RTSP illustration" width="29%">
+</div>
+
+---
+
+## Transporting Content to Various User Devices
+
+- TV sets
+- Set-top boxes
+- Video game consoles
+- Computers
+- Tablet computers
+- Smartphones
+- Smartwatches
+
+<div style="text-align:center; margin-top: 4px;">
+  <img src="media/slide15-image12.png" alt="Target devices" width="32%">
+</div>
+
+---
+
+## Transcoder
+
+- Various technical limitations for:
+  - <span style="color:#A71930; font-weight:700;">Screen size and type</span>
+  - <span style="color:#A71930; font-weight:700;">Processor</span>
+  - <span style="color:#A71930; font-weight:700;">Memory for buffering</span>
+  - <span style="color:#A71930; font-weight:700;">Communications</span>
+  - <span style="color:#A71930; font-weight:700;">Power source</span>
+- <span style="color:#A71930; font-weight:700;">No</span> universal digital video signal directly available for all kinds of devices.
+- Solution: <span style="color:#00693C; font-weight:700;">transcoder</span>.
+
+---
+
+## Transcoding for Live Video Streaming
+
+![](media/slide17-image13.png)
+
+<span class="small">Source: Wowza Media Systems</span>
+
+---
+
+## Transcoding Architecture
+
+![](media/slide18-image14.png)
+
+<span class="small">Based on: J. R. Smith, *Digital video libraries and the Internet*.</span>
+
+</textarea>
+
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>
+  var slideshow = remark.create({
+    ratio: "16:9",
+    navigation: {
+      scroll: false
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', function () {
+    var video = document.getElementById('intro-video');
+    if (!video || !('IntersectionObserver' in window)) return;
+
+    var playWhenVisible = function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var playPromise = video.play();
+          if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(function () {});
+          }
+        } else {
+          video.pause();
+        }
+      });
+    };
+
+    var observer = new IntersectionObserver(playWhenVisible, {
+      threshold: 0.65
+    });
+
+    observer.observe(video);
+  });
+</script>
+</body>
+</html>
+
