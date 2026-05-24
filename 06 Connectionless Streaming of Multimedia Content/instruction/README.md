@@ -69,7 +69,8 @@ Useful files:
 
 ## Network Preparation
 
-Check the IP address of the machine that will send the stream.
+Check the IP address of the receiver machine, because the sender commands use `RECEIVER_IP`.
+If sender and receiver run on different machines, also note which machine is the sender.
 
 ```bash
 # Ubuntu
