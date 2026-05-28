@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AMIPaC HLS Player</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+</head>
+<body>
+  <main class="app">
+    <section class="workspace" aria-label="HLS player">
+      <div class="video-shell">
+        <video id="video" controls playsinline></video>
+      </div>
+
+      <form id="source-form" class="source-bar">
+        <label for="source-select">Playlist</label>
+        <select id="source-select" name="source">
+          <option value="streams/sample/master.m3u8">Local ABR sample</option>
+          <option value="streams/sample/180p/playlist.m3u8">Local 180p rendition</option>
+          <option value="streams/sample/360p/playlist.m3u8">Local 360p rendition</option>
+          <option value="streams/sample/720p/playlist.m3u8">Local 720p rendition</option>
+        </select>
+        <label for="custom-url">Custom URL</label>
+        <input id="custom-url" name="customUrl" type="url" placeholder="Custom .m3u8 URL">
+        <button type="submit">Load</button>
+      </form>
+    </section>
+
+    <aside class="side-panel" aria-label="Stream diagnostics">
+      <section class="panel">
+        <h2>Status</h2>
+        <p id="status">Idle</p>
+      </section>
+
+      <section class="panel">
+        <h2>Quality</h2>
+        <div id="quality-controls" class="quality-controls"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Stream</h2>
+        <dl class="metrics">
+          <div>
+            <dt>Bitrate</dt>
+            <dd id="metric-bitrate">-</dd>
+          </div>
+          <div>
+            <dt>Resolution</dt>
+            <dd id="metric-resolution">-</dd>
+          </div>
+          <div>
+            <dt>Video codec</dt>
+            <dd id="metric-video-codec">-</dd>
+          </div>
+          <div>
+            <dt>Audio codec</dt>
+            <dd id="metric-audio-codec">-</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="panel request-panel">
+        <h2>Requests</h2>
+        <ol id="request-log" class="request-log"></ol>
+      </section>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
