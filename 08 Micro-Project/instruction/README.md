@@ -1,12 +1,14 @@
-# Micro-Project: HLS Web Player
+# FFmpeg, HLS Playlists and Optional HLS Web Player
 
 Andrzej Matiolanski, Mikolaj Leszczuk
 
 ## Introduction
 
-The purpose of this micro-project is to build and customize a browser-based HTTP Live Streaming (HLS) player. The player should use `hls.js` where Media Source Extensions are available and fall back to native HLS playback when the browser supports it directly.
+The purpose of this exercise is to refresh selected FFmpeg workflows, generate HTTP Live Streaming (HLS) playlists, and optionally build a browser-based HLS player.
 
-This exercise follows the streaming workflows from Exercises 06 and 07. Here the focus moves from transport setup to adaptive HTTP delivery, playlist generation, browser playback and basic player diagnostics.
+The required Moodle submission is the short report described in Parts 1-3. The browser player in Parts 4-7 is the supplemental micro-project and should be submitted only if you choose to do the optional assignment.
+
+The optional player should use `hls.js` where Media Source Extensions are available and fall back to native HLS playback when the browser supports it directly.
 
 ## Learning Goals
 
@@ -15,10 +17,9 @@ After completing this exercise, the student should be able to:
 - generate HLS media playlists and a master playlist from a local source,
 - serve HLS assets over HTTP for browser playback,
 - explain how an HLS master playlist points to multiple bitrate variants,
-- use `hls.js` to load an HLS stream in a web player,
-- implement manual bitrate selection,
-- display basic information about the active stream,
-- inspect playlist and segment requests in the browser.
+- explain how HLS playlist and segment requests appear in a browser,
+- optionally use `hls.js` to load an HLS stream in a web player,
+- optionally implement manual bitrate selection and player diagnostics.
 
 ## Prerequisites
 
@@ -68,25 +69,51 @@ Useful files:
 
 Generated files are written under `player/streams/`.
 
-## Expected Outputs
+## Moodle Submission
 
-Each student should produce:
+### 08 Report Assignment
 
-1. one local source video,
-2. one generated HLS master playlist with at least three variants,
-3. one working browser player loaded over HTTP,
-4. manual quality switching in the player,
-5. displayed stream information: bitrate, resolution and codecs when available,
-6. a short request log or browser Network tab screenshot showing `.m3u8` and segment requests,
-7. a short H.264 vs H.265 size comparison,
-8. a short codec/report research note,
-9. a final project URL or repository link submitted through the Moodle assignment form.
+Submit the required short report to:
 
-## Exercise
+```text
+08 Report Assignment
+```
 
-### Part 1. Create or select source media
+Use the due date shown in Moodle for your course.
 
-You can use your own short video file, a screen recording or the generated sample source from this exercise. The generated source is deterministic and does not require downloading external media:
+Use the Moodle template and include:
+
+1. `Activity 1.0 | Preliminary data` - video size, codec names, display dimensions and capture parameters,
+2. `Activity 1.1 | Paste the complete command` - the command used to create `media/source.mp4`,
+3. `Activity 1.2 | Paste output of the command` - `ffprobe` summary of the `.mp4` content,
+4. `Activity 2.0 | Leading Video & Audio Codecs in the last year`,
+5. `Activity 2.1 | Top 3 Cloud Storage Providers`,
+6. `Activity 2.2 | Target Bandwidth Reduction in % (H.264 vs. H.265)`,
+7. `Activity 2.3 | Bandwidth Reduction (in %) in Screen Capture files` - use your generated source file if you did not make a screen capture,
+8. `Activity 3.0 | Sample HLS Playlist Created`.
+
+Parts 1-3 below generate the material for this report.
+
+### 08 Supplemental Exercise (Optional) Assignment
+
+Submit the optional HLS.js micro-project only if you decide to do the supplemental exercise:
+
+```text
+08 Supplemental Exercise (Optional) Assignment
+```
+
+Submit:
+
+1. link to your functional HLS.js-based web player or repository with all files,
+2. additional comments, if needed.
+
+Parts 4-7 below support this optional project. Do not submit the optional player link to `08 Report Assignment`; submit it to `08 Supplemental Exercise (Optional) Assignment`.
+
+## Required Report Exercise
+
+### Part 1. FFmpeg refresher
+
+You can use your own short video file, a screen recording or the generated sample source from this exercise. The generated source is local and does not require downloading external media:
 
 ```bash
 scripts/create-sample-source.sh media/source.mp4 60
@@ -121,7 +148,7 @@ Answer:
 3. If you used screen capture, what display name and capture size did you use?
 4. Why is a local source preferable to a public web video for a reproducible lab?
 
-### Part 2. Compare codecs
+### Part 2. Leading codecs and H.264/H.265 comparison
 
 Find available encoders for H.264, H.265 and VP9:
 
@@ -143,7 +170,7 @@ Compare file sizes:
 ls -lh media/source.mp4 media/source_h265.mp4
 ```
 
-Research checkpoint: open the current Encoding.com resource library and identify the latest available Global Media Format Report. When this exercise was refreshed, the official resource page listed "Global Media Format Report 2023"; if a newer official edition appears, use the newest one and record its title and year.
+Research checkpoint: open the Encoding.com resource library and identify the newest official Global Media Format Report available when you do the exercise. Record its title and year.
 
 From that report, record:
 
@@ -153,7 +180,7 @@ From that report, record:
 
 If the report is unavailable, record that instead of guessing.
 
-If you use an external H.264/H.265 comparison source, record the claimed target bitrate reduction and cite the source. Treat it as context, then compare it with your own local transcode result.
+Use lecture material or a credible external source for the H.264/H.265 target bitrate comparison. Record the claimed target bitrate reduction and cite the source. Treat it as context, then compare it with your own local transcode result.
 
 Answer:
 
@@ -164,7 +191,7 @@ Answer:
 5. What target bitrate reduction does your H.264/H.265 comparison source claim, if you used one?
 6. Why can a single local transcode differ from industry-wide codec trends?
 
-### Part 3. Generate HLS variants
+### Part 3. Generate HLS playlists
 
 Generate a small adaptive HLS package:
 
@@ -191,6 +218,8 @@ Answer:
 1. Which tags point to available bitrate variants?
 2. Which attributes describe bandwidth and resolution?
 3. How are media playlists different from the master playlist?
+
+## Optional Supplemental Micro-Project
 
 ### Part 4. Validate playback with VLC
 
@@ -285,20 +314,6 @@ Optional features:
 - country/IP based access check using a documented API or a server-side implementation.
 
 If you implement IP or geolocation based access control, document what is enforced on the server side and what is only a browser-side demonstration. Browser-only checks are easy to bypass and should not be described as secure content protection.
-
-## Report
-
-If a report is required, include:
-
-1. source media description from `ffprobe`,
-2. H.264 vs H.265 size comparison,
-3. codec/report research note,
-4. generated HLS master playlist,
-5. player URL or repository URL,
-6. screenshots or notes showing playback,
-7. manual quality switching evidence,
-8. request log evidence,
-9. short conclusion on how HLS differs from the direct UDP, RTP, HTTP and RTSP workflows from Exercises 06 and 07.
 
 ## Troubleshooting
 
