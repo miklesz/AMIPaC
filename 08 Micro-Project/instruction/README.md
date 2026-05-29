@@ -83,7 +83,7 @@ Use the due date shown in Moodle for your course.
 
 Use the Moodle template and include:
 
-1. `Activity 1.0 | Preliminary data` - video size, codec names, display dimensions and capture parameters,
+1. `Activity 1.0 | Preliminary data` - identify codec type names, video size/dimensions in pixels, display dimensions and capture parameters,
 2. `Activity 1.1 | Paste the complete command` - the command used to create `media/source.mp4`,
 3. `Activity 1.2 | Paste output of the command` - `ffprobe` summary of the `.mp4` content,
 4. `Activity 2.0 | Leading Video & Audio Codecs in the last year`,
@@ -135,6 +135,8 @@ ffmpeg -f avfoundation -framerate 30 -i "<screen device index>:<audio device ind
   -c:v libx264 -preset ultrafast -pix_fmt yuv420p media/source.mp4
 ```
 
+In FFmpeg commands, `-video_size` uses `WIDTHxHEIGHT` in pixels, for example `1280x720`.
+
 Inspect the result:
 
 ```bash
@@ -143,8 +145,8 @@ ffprobe -hide_banner media/source.mp4
 
 Answer:
 
-1. What are the container format, video codec and audio codec?
-2. What are the resolution, duration and average bitrate?
+1. What are the container format, video codec type and audio codec type?
+2. What are the video dimensions in pixels, duration and average bitrate?
 3. If you used screen capture, what display name and capture size did you use?
 4. Why is a local source preferable to a public web video for a reproducible lab?
 
