@@ -127,6 +127,8 @@ ffmpeg -f x11grab -framerate 30 -video_size 1280x720 -i :0.0 \
   -c:v libx264 -preset ultrafast -pix_fmt yuv420p media/source.mp4
 ```
 
+In the X11 example, `:0.0` is the display name. If your environment uses a different display, use the value from `echo "$DISPLAY"` or your desktop session tools.
+
 Alternative macOS screen capture:
 
 ```bash
@@ -134,6 +136,8 @@ ffmpeg -f avfoundation -list_devices true -i ""
 ffmpeg -f avfoundation -framerate 30 -i "<screen device index>:<audio device index>" \
   -c:v libx264 -preset ultrafast -pix_fmt yuv420p media/source.mp4
 ```
+
+In the macOS example, replace the placeholders with device indexes printed by the first `avfoundation` command.
 
 In FFmpeg commands, `-video_size` uses `WIDTHxHEIGHT` in pixels, for example `1280x720`.
 
@@ -157,6 +161,8 @@ Find available encoders for H.264, H.265 and VP9:
 ```bash
 ffmpeg -hide_banner -encoders | grep -E 'libx264|libx265|libvpx-vp9'
 ```
+
+Encoder names such as `libx264`, `libx265` and `libvpx-vp9` are FFmpeg encoder identifiers. Use the command above to check which identifiers are available in your local FFmpeg build before using them in a transcoding command.
 
 Create an H.265 version of the source:
 

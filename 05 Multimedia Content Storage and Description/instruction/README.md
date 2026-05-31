@@ -14,6 +14,8 @@ Please download laboratory materials and video sequences before starting the exe
 
 Please boot the computer into Windows and log in.
 
+Most tasks can also be completed on Ubuntu or macOS when equivalent tools are available. The bundled Exif Reader executable is Windows-specific, but Exif metadata can also be inspected with `exiftool`, Python libraries such as `exifread`, MATLAB `imfinfo`, or another reliable metadata viewer.
+
 ## Exchangeable Image File Format (Exif)
 
 Exif is a specification of metadata format for images and audio. It allows storing additional information about multimedia content. It supports formats such as JPEG, TIFF, RIFF and WAV (for audio).
@@ -24,6 +26,8 @@ Exif is a specification of metadata format for images and audio. It allows stori
 2. Use the free program Exif Reader (directory `EXIF` in the laboratory materials) or appropriate MATLAB command(s) and function(s) to inspect metadata in your images.
 3. Look at metadata stored with each image. Do images have the same set of metadata?
 4. Consider, optionally, the possibility of adding or removing information from a metadata set.
+
+Important: not every JPEG file contains useful Exif metadata. Some web services strip metadata for privacy or optimization. If an image has no camera, exposure, date or GPS fields, choose another original image, for example a photo copied directly from a phone or camera.
 
 ## Moving Picture Experts Group 7 (MPEG-7)
 
@@ -75,7 +79,12 @@ Description Definition Language (DDL) is a standard that defines the syntax exte
 
 One should place this definition in the file that defines the schema (`.xsd` file).
 
-A complete example has been placed in the laboratory materials: `BiM_impl/examples/5`. Directory `5.1` contains an example without new DDL elements, while `5.2` includes a new DDL element.
+The bundled BiM examples are in `metadata/BiM_impl/examples/`. Use the available examples rather than old references to `5.1` or `5.2`:
+
+- `examples/1` contains a compact XML/XSD pair (`ehd.xml`, `ehd.xsd`) suitable for a first encoder/decoder test,
+- `examples/4` contains MPEG-7 XML documents and matching schemas, including `monsterJr4Ver3.xml` with `Mpeg7Ver3.xsd` and the `mdsExamplesClause*.xml` files with their `MdsExampleTestClause*.xsd` schemas.
+
+If you extend a document with a non-standard element, copy one of these examples to a working directory first, edit the copied XML/XSD pair, and report which schema file was used.
 
 ### Tasks
 
