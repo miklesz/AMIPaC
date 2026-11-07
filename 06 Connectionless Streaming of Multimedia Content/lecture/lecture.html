@@ -175,26 +175,19 @@ class: center, middle, intro-video-slide
 
 ## Introducing Real-Time Transport Protocol (RTP)
 
-- Transport layer **protocol** for real-time streaming media.
-- Not a standalone protocol.
-- Requiring another transport protocol to combine with:
-  - Theoretically: any transport protocol
-  - Practically: used only with **User Datagram Protocol (UDP)**
-- Inheriting **UDP** features, including support for both **Unicast** and **Multicast** transmissions.
-- **UDP+RTP** is a good multimedia transport protocol.
-- **RTP** header located between **UDP** header and **UDP** payload, but not another network layer.
+- RTP carries real-time media such as audio and video.
+- In this exercise, RTP runs over **User Datagram Protocol (UDP)**. Other suitable transports are possible.
+- The UDP payload contains the RTP header followed by the media payload.
+- RTP works with unicast or multicast when the underlying network supports it.
 
 ---
 
 ## RTP and Quality of Service (QoS)
 
-- No guarantee for **QoS** in **RTP**.
-- QoS guarantees through cooperation with other protocols, such as:
-  - **Real-Time Streaming Protocol (RTSP)**
-  - **Session Initiation Protocol (SIP)**
-  - **H.323**
-  - **Resource Reservation Protocol (RSVP)**
-- Their task is to establish a connection before data can be transmitted using RTP.
+- RTP neither reserves resources nor guarantees quality of service.
+- RTSP, SIP and H.323 handle session setup or control. That is separate from reserving network resources.
+- RSVP can request resource reservations on networks that support it.
+- Reference: [RFC 3550](https://www.rfc-editor.org/rfc/rfc3550.html).
 
 ---
 
@@ -235,8 +228,7 @@ class: center, middle, intro-video-slide
 ## RTP Control Protocol (RTCP)
 
 - Not to be confused with <span style="color:#FF0000; font-weight:700;">Real Time Streaming Protocol (RTSP)</span>.
-- <span style="color:#00B0F0; font-weight:700;">RTP</span> transport controlled by <span style="color:#FF0000; font-weight:700;">RTCP</span>.
-- Main additional functionality by <span style="color:#FF0000; font-weight:700;">RTCP</span>: QoS monitoring for volumes of data transports.
+- RTCP reports delivery quality, including packet loss and jitter, and conveys information about session participants.
 - <span style="color:#00B0F0; font-weight:700;">RTP</span> and <span style="color:#FF0000; font-weight:700;">RTCP</span> working simultaneously.
 
 ![](media/slide13-image10.png)
