@@ -38,7 +38,7 @@
 
     .qoe-footer {
       position: fixed;
-      right: 18px;
+      left: 18px;
       bottom: 10px;
       z-index: 9999;
       font-size: 13px;
@@ -66,12 +66,11 @@ Mikołaj Leszczuk (AGH University of Krakow), Rafał Myszka (Akamai), Jakub Nawa
 
 ---
 
-## Why Connectionless Streaming Is Bad?
+## Why Deliver Media Over HTTP?
 
-- Running out of **IP** addresses
-- Network Address Translation (**NAT**)
-- No **RTP/UDP** easily possible then… ☹
-- But **NAT** usually OK with **Web** traffic! ☺
+- IPv4 address scarcity led to widespread use of Network Address Translation (**NAT**).
+- Direct media over RTP/UDP can require additional setup to cross NAT and firewalls.
+- HTTP delivery can reuse web servers, caches and content delivery networks.
 
 <div style="text-align:center;">
   <img src="media/ppt-image4.png" alt="Slide 2 image" width="34%">
@@ -79,13 +78,11 @@ Mikołaj Leszczuk (AGH University of Krakow), Rafał Myszka (Akamai), Jakub Nawa
 
 ---
 
-## Why Connection-Oriented Streaming Is Good?
+## From Web Delivery to Streaming
 
-- **Web** means **HTTP/TCP/IP**
-- Let’s encapsulate streaming as **Web**
-- Progressive Media Download (**PMD**)
-- Called as “streaming” even if technically not streaming
-- What are technical details?
+- HTTP/1.1 and HTTP/2 use TCP; [HTTP/3](https://www.rfc-editor.org/rfc/rfc9114.html) uses QUIC over UDP.
+- **Progressive Media Download (PMD):** playback can start before the whole file is downloaded.
+- Adaptive HTTP streaming develops this idea by requesting segments and switching among representations.
 
 <div style="text-align:center;">
   <img src="media/ppt-image5.png" width="25%">
@@ -172,16 +169,11 @@ Mikołaj Leszczuk (AGH University of Krakow), Rafał Myszka (Akamai), Jakub Nawa
 
 ---
 
-## Header Information Location
+## Metadata Location and Playback Startup
 
-- **End of file (AVI format)**
-  - **First download, then play**
-  - **Playback start by**: total download time
-  - **Min bandwidth**: no (full pre-buffering)
-- **Beginning of file (streaming formats)**
-  - **Simultaneous download and play**
-  - **Playback start by**: bandwidth statistics
-  - **Min bandwidth**: yes (smooth playback)
+- **Metadata near the end:** a player may request it with an HTTP byte-range request, if supported. Otherwise, startup may wait for more of the file to download.
+- **Metadata at the front:** a player can parse it early and start when it has enough media buffered.
+- For MP4, moving the metadata to the front is often called **fast start**. Playback can still stall if delivery falls behind.
 
 <div style="text-align:center;">
 </div>
@@ -223,7 +215,7 @@ Software components add specific functionalities allowing customization & optimi
 
 ---
 
-## What is Chunked **PMD**?
+## Segments instead of a single download
 
 - Progress Bar
 - Iteratively growing list of fragments (chunks) requested for download
@@ -238,7 +230,7 @@ Software components add specific functionalities allowing customization & optimi
 
 ---
 
-## What is Chunked **PMD**?
+## From segment requests to playback
 
 - Progress Bar
 - Iteratively growing list of fragments (chunks) requested for download
@@ -247,16 +239,16 @@ Software components add specific functionalities allowing customization & optimi
   <img src="media/ppt-image10.png" alt="Slide 13 image" width="62%">
 </div>
 
-- Technology requesting (e.g.) each **Group of Pictures (GOP)** in a separate request
-- Playback begins once chunk downloaded
+- A request usually retrieves a segment; a segment may contain more than one **Group of Pictures (GOP)**.
+- Playback begins once the player has buffered enough media.
 - **Examples: YouTube, Vimeo**
 
 ---
 
 ## Dynamic Adaptive Streaming over **HTTP**
 
-- Continuous feedback from clients - based on bandwidth and CPU usage
-- Content made available at a variety of bit-rates - each stream divided into short length (2-10 seconds) fragments
+- The player selects a representation using signals such as estimated throughput, buffer level and device capabilities.
+- The same content is encoded at several bitrates and divided into short segments.
 - Clients having the extensive control
   - Smooth changes of quality
   - Subtitles language change
@@ -502,16 +494,14 @@ ffmpeg -i input.mp4 \
 ## Recapitulation
 
 - **PMD**
-  - Multimedia content stored on a local machine
-  - No rate control
-  - Traditionally, the whole file is transmitted (even if it is not necessary)
-  - No need to keep many versions of the same file (on the server side)
+  - The player progressively reads a media file; the browser may cache it
+  - One file generally offers one encoded bitrate
+  - A player may download ahead or request byte ranges when seeking
   - Uses existing HTTP architecture
-- **Streaming**
-  - No content stored on a local machine
-  - Adaptive rate control
-  - Only the chunk being watched is transmitted
-  - Built-in support for fast-forwarding
+- **Adaptive HTTP streaming**
+  - A manifest describes representations and how to locate media segments
+  - The player can switch bitrate between suitable segment boundaries
+  - Segments can be buffered ahead and cached; seeking depends on the stream and player
   - Uses existing HTTP architecture
 
 ---

@@ -51,7 +51,7 @@
 
     .qoe-footer {
       position: fixed;
-      right: 18px;
+      left: 18px;
       bottom: 10px;
       z-index: 9999;
       font-size: 13px;
@@ -75,9 +75,8 @@
 
 # Connectionless Streaming of Multimedia Content
 
-<div style="font-size:1.05em; color:#808080;">Mikolaj Leszczuk</div>
-<div style="font-size:1.05em;"><span style="color:#00A200;">Akademia Gorniczo-Hutnicza</span> <span style="color:#808080;">im. Stanislawa Staszica w Krakowie</span></div>
-<div style="font-size:1.05em; color:#808080;">AGH University of Science and Technology</div>
+<div style="font-size:1.05em; color:#626262;">Mikołaj Leszczuk</div>
+<div style="font-size:1.05em; color:#626262;">AGH University of Krakow</div>
 
 ---
 
@@ -97,7 +96,6 @@ class: center, middle, intro-video-slide
     id="intro-video"
     src="media/SARACEN Tutorial 1 - Streaming technologies.v2.avi [ef0dDyFL8D4].mp4"
     playsinline
-    loop
     controls
     preload="metadata">
   </video>
@@ -108,8 +106,8 @@ class: center, middle, intro-video-slide
 ## Two Types of Access to Streaming Media
 
 ### Live (Broadcasting)
-- Video **captured** on the **server**.
-- All users watch the same current video.
+- Video is captured and delivered as the event happens.
+- Viewers follow the same event, with latency that can vary by device and network.
 - Example: **live** concert streaming.
 
 ### On Request (On Demand)
@@ -198,17 +196,17 @@ class: center, middle, intro-video-slide
   - Packet delivery (at all)
   - Scheduled packet delivery (even if lower layers do guarantee it)
   - Ordered packet delivery
-- <span style="color:#00693C; font-weight:700;">But extends UDP</span> with information on:
+- **RTP adds media transport information**, including:
   - Type of transmitted data
   - Timestamp
-  - Serial number (of packet)
+  - Packet sequence number
 
 ---
 
 ## RTP Sequential Number
 
-- Sending packet order <span style="color:#00693C; font-weight:700;">possible</span> to reconstruct at receiver.
-- <span style="color:#00693C; font-weight:700;">Possible</span> to correctly localize packet in stream, for example without decompressing video frames.
+- Sequence numbers let the receiver detect gaps and reconstruct packet order.
+- Timestamps describe media timing. Neither field recovers a lost packet by itself.
 
 ---
 
@@ -305,28 +303,9 @@ class: center, middle, intro-video-slide
     }
   });
 
-  window.addEventListener('DOMContentLoaded', function () {
-    var video = document.getElementById('intro-video');
-    if (!video || !('IntersectionObserver' in window)) return;
-
-    var playWhenVisible = function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          var playPromise = video.play();
-          if (playPromise && typeof playPromise.catch === 'function') {
-            playPromise.catch(function () {});
-          }
-        } else {
-          video.pause();
-        }
-      });
-    };
-
-    var observer = new IntersectionObserver(playWhenVisible, {
-      threshold: 0.65
-    });
-
-    observer.observe(video);
+  slideshow.on('hideSlide', function () {
+    var video = document.querySelector('.remark-slide-container video#intro-video');
+    if (video) video.pause();
   });
 </script>
 </body>
