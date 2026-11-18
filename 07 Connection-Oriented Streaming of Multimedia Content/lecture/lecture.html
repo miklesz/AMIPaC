@@ -112,10 +112,10 @@ Mikołaj Leszczuk (AGH University of Krakow), Rafał Myszka (Akamai), Jakub Nawa
 
 ---
 
-## **HTTP** Process for **PMD**
+## Progressive Download over HTTP/1.1 or HTTP/2
 
 1. Clicking hyperlink for audio or video file
-1. Establishing TCP connection with URL
+1. Opening or reusing a TCP connection to the server
 1. Requesting contents of URL using GET
 1. Returning contents in GET response
 1. Determining Content-Type from header
@@ -218,14 +218,14 @@ Software components add specific functionalities allowing customization & optimi
 ## Segments instead of a single download
 
 - Progress Bar
-- Iteratively growing list of fragments (chunks) requested for download
+- A playlist or manifest identifies the segments. On-demand playlists can be fixed; live playlists may add new segments and drop old ones.
 
 <div style="text-align:center;">
   <img src="media/ppt-image10.png" alt="Slide 13 image" width="62%">
 </div>
 
 - Not requesting full content in **HTTP** request anymore
-- Breaking content into sequence of small **HTTP-based** file segments
+- Segments can be separate files or byte ranges within one file.
 - Each segment containing short interval of playback time of content
 
 ---
@@ -233,7 +233,7 @@ Software components add specific functionalities allowing customization & optimi
 ## From segment requests to playback
 
 - Progress Bar
-- Iteratively growing list of fragments (chunks) requested for download
+- The player fetches upcoming segments as needed.
 
 <div style="text-align:center;">
   <img src="media/ppt-image10.png" alt="Slide 13 image" width="62%">
@@ -285,11 +285,9 @@ Software components add specific functionalities allowing customization & optimi
 
 ## Manifest Files for HTTP Streaming
 
-<div style="text-align:center;">
-  <img src="media/ppt-image12.png" alt="Slide 18 image" width="46%">
-</div>
-
 Question: what information must a player learn before it can choose the first segment?
+
+Consider available bitrates, media formats, and how the player locates each segment.
 
 ---
 
@@ -442,11 +440,13 @@ ffmpeg -i input.mp4 \
 
 ---
 
-## **Which streaming formats are you currently using?**
+## Streaming Formats: An Earlier Poll
 
 <div style="text-align:center;">
-  <img src="media/ppt-image20.png" alt="Slide 29 image" width="62%">
+  <img src="media/ppt-image20.png" alt="Streaming formats discussed in the lecture" width="62%" style="max-height:360px; object-fit:contain">
 </div>
+
+<p class="small">Historical survey example; these percentages are not current market shares.</p>
 
 ---
 

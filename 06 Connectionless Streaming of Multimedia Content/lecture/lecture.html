@@ -28,21 +28,20 @@
       color: #666;
     }
     .remark-slide-content.intro-video-slide {
-      padding-top: 0.15em;
-      padding-bottom: 0.12em;
-      padding-left: 0.35em;
-      padding-right: 0.35em;
+      padding: 0.65em 1.4em 0.8em;
     }
+    .intro-video-slide h2 { margin: 0 0 0.35em; }
     .intro-video-frame {
       width: 100%;
       margin-top: 0.1em;
     }
     .intro-video-frame video {
       display: block;
-      width: 100%;
+      width: auto;
       height: auto;
       max-width: 100%;
-      max-height: calc(100vh - 2.5em);
+      max-height: 385px;
+      margin: 0 auto;
       object-fit: contain;
       border-radius: 10px;
       border: 1px solid #ccd5df;
@@ -91,10 +90,13 @@
 
 class: center, middle, intro-video-slide
 
+## Streaming technologies: introduction
+
 <div class="intro-video-frame">
   <video
     id="intro-video"
     src="media/SARACEN Tutorial 1 - Streaming technologies.v2.avi [ef0dDyFL8D4].mp4"
+    poster="media/streaming-intro-poster.jpg"
     playsinline
     controls
     preload="metadata">
